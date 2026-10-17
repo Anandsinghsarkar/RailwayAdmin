@@ -748,8 +748,8 @@ export default function Home() {
       const arrayBuffer = await zipFile.arrayBuffer();
       const zip = await JSZip.loadAsync(arrayBuffer);
       const allFileEntries = Object.keys(zip.files).filter((f) => !zip.files[f].dir);
-      const envFilesSkipped = allFileEntries.filter((f) => /(^|\\/)\\.env(?:\\.[^/]+)?$/.test(f));
-      const fileEntries = allFileEntries.filter((f) => !/(^|\\/)\\.env(?:\\.[^/]+)?$/.test(f));
+      const envFilesSkipped = allFileEntries.filter((f) => /(^|\/)\.env(?:\.[^/]+)?$/.test(f));
+      const fileEntries = allFileEntries.filter((f) => !/(^|\/)\.env(?:\.[^/]+)?$/.test(f));
       updateLastStep('done', `${fileEntries.length} files`);
 
       const paths = fileEntries.map((p) => p.split('/')[0]);
