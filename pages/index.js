@@ -668,6 +668,49 @@ export default function Home() {
     }
   };
 
+  // ============ ENV FILE UPLOAD ============
+  // Reads a local .env file in the browser and imports its KEY=value pairs.
+  // Values are sent to Railway variables; the .env file itself is not uploaded.
+  const handleEnvFileUpload = async (e, setConfig) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = [];
+      for (const rawLine of text.split(/\r?\n/)) {
+        const line = rawLine.trim();
+        if (!line || line.startsWith('#')) continue;
+        const match = line.match(/^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+        if (!match) continue;
+        let value = match[2].trim();
+        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+          value = value.slice(1, -1);
+        } else {
+          value = value.replace(/\s+#.*$/, '').trim();
+        }
+        parsed.push({ key: match[1], value });
+      }
+      if (!parsed.length) {
+        showToast('Valid KEY=value entries nahi mile!', true);
+        return;
+      }
+      setConfig((prev) => {
+        const merged = [...(prev.envVars || [])];
+        for (const item of parsed) {
+          const index = merged.findIndex((v) => v.key.trim() === item.key);
+          if (index >= 0) merged[index] = item;
+          else merged.push(item);
+        }
+        return { ...prev, envVars: merged.filter((v) => v.key.trim() || v.value.trim()) };
+      });
+      showToast(`✅ ${parsed.length} env variables imported`);
+    } catch (err) {
+      showToast('Env file read nahi ho payi: ' + err.message, true);
+    } finally {
+      e.target.value = '';
+    }
+  };
+
   // ============ ZIP UPLOAD ============
   const handleZipSelect = (e) => {
     const file = e.target.files?.[0];
@@ -1446,6 +1489,14 @@ export default function Home() {
                 onChange={(e) => setRepoDeployConfig({ ...repoDeployConfig, serviceName: e.target.value })}
               />
 
+              <label>Import .env File (optional)</label>
+              <input
+                type="file"
+                accept=".env,text/plain"
+                onChange={(e) => handleEnvFileUpload(e, setRepoDeployConfig)}
+                style={{ padding: '10px', background: '#0a0a0f', borderRadius: '10px', border: '1px dashed #a855f7', cursor: 'pointer', width: '100%', marginBottom: '8px' }}
+              />
+              <p className="hint">.env ke KEY=value entries Railway Variables mein import hongi; file repo mein upload nahi hoti.</p>
               <label>Env Variables (optional)</label>
               {repoDeployConfig.envVars.map((env, i) => (
                 <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
@@ -1523,6 +1574,14 @@ export default function Home() {
                   📦 {zipDeploy.zipFile.name} ({(zipDeploy.zipFile.size / 1024).toFixed(1)} KB)
                 </div>
               )}
+              <label>Import .env File (optional)</label>
+              <input
+                type="file"
+                accept=".env,text/plain"
+                onChange={(e) => handleEnvFileUpload(e, setZipDeploy)}
+                style={{ padding: '10px', background: '#0a0a0f', borderRadius: '10px', border: '1px dashed #a855f7', cursor: 'pointer', width: '100%', marginBottom: '8px' }}
+              />
+              <p className="hint">.env file se KEY=value entries Railway Variables mein import hongi. File public repo mein upload nahi hoti.</p>
               <label>Env Variables</label>
               {zipDeploy.envVars.map((env, i) => (
                 <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
