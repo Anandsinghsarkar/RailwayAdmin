@@ -202,6 +202,15 @@ export default function Home() {
   const [varsLoading, setVarsLoading] = useState(false);
   const [newVar, setNewVar] = useState({ name: '', value: '' });
   const [revealed, setRevealed] = useState({});
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Show the floating scroll-to-top button after scrolling down.
+  useEffect(() => {
+    const handleScroll = () => setShowScrollTop(window.scrollY > 280);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // ============ LOAD ============
   useEffect(() => {
@@ -1272,6 +1281,18 @@ export default function Home() {
             </>
           )}
         </main>
+
+        {showScrollTop && (
+          <button
+            type="button"
+            className="scroll-top"
+            aria-label="Scroll to top"
+            title="Back to top"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            ↑
+          </button>
+        )}
 
         {/* BOTTOM NAV */}
         <nav className="bottom-nav">
