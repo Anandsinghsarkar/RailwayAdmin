@@ -750,7 +750,7 @@ export default function Home() {
       const allFileEntries = Object.keys(zip.files).filter((f) => !zip.files[f].dir);
       const envFilesSkipped = allFileEntries.filter((f) => /(^|\/)\.env(?:\.[^/]+)?$/.test(f));
       const fileEntries = allFileEntries.filter((f) => !/(^|\/)\.env(?:\.[^/]+)?$/.test(f));
-      updateLastStep('done', `${fileEntries.length} files`);
+      updateLastStep('done', `${fileEntries.length} files${envFilesSkipped.length ? ` • skipped ${envFilesSkipped.length} .env file(s) for safety` : ''}`);
 
       const paths = fileEntries.map((p) => p.split('/')[0]);
       const uniqueRoots = [...new Set(paths)];
